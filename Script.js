@@ -20,41 +20,17 @@ document.getElementById("search-btn").addEventListener("click", async () => {
         }
 
         const data = searchData[0];
+        const downloadUrl = `https://spotifyapi.caliphdev.com/api/download/track?url=${encodeURIComponent(data.url)}`;
 
         songDetails.innerHTML = `
             <p><strong>Judul:</strong> ${data.title}</p>
             <p><strong>Artis:</strong> ${data.artist}</p>
             <p><strong>URL:</strong> <a href="${data.url}" target="_blank">Klik di sini</a></p>
             <img src="${data.thumbnail}" alt="Thumbnail" style="width:100%; border-radius:5px; margin-top:10px;" />
-            <button id="download-btn" data-url="${data.url}" style="margin-top: 10px;">Download Lagu</button>
+            <a href="${downloadUrl}" id="download-btn" target="_blank" style="display:block; margin-top:10px; padding:10px; background-color:#ff5733; color:white; text-align:center; border-radius:5px; text-decoration:none;">
+                🔽 Download Lagu
+            </a>
         `;
-
-        document.getElementById("download-btn").addEventListener("click", async (event) => {
-            const downloadUrl = `https://spotifyapi.caliphdev.com/api/download/track?url=${encodeURIComponent(event.target.getAttribute("data-url"))}`;
-            
-            songDetails.innerHTML += "<p>⏳ Sedang mengunduh...</p>";
-
-            try {
-                const downloadResponse = await fetch(downloadUrl);
-
-                if (downloadResponse.ok && downloadResponse.headers.get("content-type").includes("audio/mpeg")) {
-                    const audioBlob = await downloadResponse.blob();
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    
-                    const downloadLink = document.createElement("a");
-                    downloadLink.href = audioUrl;
-                    downloadLink.download = `${data.title}.mp3`;
-                    downloadLink.click();
-                    
-                    songDetails.innerHTML += "<p>✅ Lagu berhasil diunduh!</p>";
-                } else {
-                    alert("❌ Gagal mengunduh file audio. File tidak ditemukan.");
-                }
-            } catch (error) {
-                console.error(error);
-                alert("❌ Terjadi kesalahan saat mengunduh lagu.");
-            }
-        });
     } catch (error) {
         console.error(error);
         songDetails.innerHTML = "❌ Terjadi kesalahan saat memproses permintaan.";
