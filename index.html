@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seveling</title>
+    <link rel="stylesheet" href="styles.css">
+<style type="text/css" id="dcoder_stylesheet">body {
+    font-family: 'Arial', sans-serif;
+    background-image: url('Modern Background Wallpaper HD.jpeg');
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    margin: 10px 0;
+}
+
+input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #1db954;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #14833b;
+}
+
+#song-info {
+    margin-top: 20px;
+}
+
+#song-details {
+    background-color: #fff;
+    color: #000;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+#whatsapp-link {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: #25d366;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#whatsapp-link:hover {
+    background-color: #1ebc57;
+}</style></head>
+<body>
+    <div class="container">
+        <h1>Spotify Player</h1>
+        <p>Support By Spotify &amp; Ahmad Jazuli</p>
+        <input id="song-input" type="text" placeholder="Masukkan judul lagu...">
+        <button id="search-btn">Cari Lagu</button>
+        <div id="song-info">
+            <h2>Detail Lagu:</h2>
+            <div id="song-details"></div>
+        </div>
+        <a id="whatsapp-link" href="https://wa.me/6285189753120?text=Halo%20Ahmad%2C%20saya%20tertarik%20dengan%20karya%20Anda!" target="_blank">
+    Hubungi Creator Ahmad Jazuli!
+        </a>
+    </div>
+    <script src="script.js"></script>
+
+<script type="text/javascript" id="dcoder_script">document.getElementById("search-btn").addEventListener("click", async () => {
+    const songInput = document.getElementById("song-input").value.trim();
+    const songDetails = document.getElementById("song-details");
+
+    if (!songInput) {
+        songDetails.innerHTML = "⚠️ Harap masukkan judul lagu.";
+        return;
+    }
+
+    songDetails.innerHTML = "⏳ Sedang mencari lagu...";
+
+    try {
+        // API untuk pencarian lagu
+        const searchApiUrl = `https://spotifyapi.caliphdev.com/api/search/tracks?q=${encodeURIComponent(songInput)}`;
+        const searchResponse = await fetch(searchApiUrl);
+        const searchData = await searchResponse.json();
+
+        if (!searchData[0]) {
+            songDetails.innerHTML = "❌ Lagu tidak ditemukan.";
+            return;
+        }
+
+        // Ambil data lagu pertama
+        const data = searchData[0];
+
+        // Tampilkan detail lagu
+        songDetails.innerHTML = `
+            <p><strong>Judul:</strong> ${data.title}</p>
+            <p><strong>Artis:</strong> ${data.artist}</p>
+            <p><strong>URL:</strong> <a href="${data.url}" target="_blank">Klik di sini</a></p>
+            <img src="${data.thumbnail}" alt="Thumbnail" style="width:100%; border-radius:5px; margin-top:10px;" />
+            <button id="download-btn" data-url="${data.url}" style="margin-top: 10px;">Download Lagu</button>
+        `;
+
+        // Tambahkan fungsi download
+        document.getElementById("download-btn").addEventListener("click", async (event) => {
+            const downloadUrl = `https://spotifyapi.caliphdev.com/api/download/track?url=${encodeURIComponent(event.target.getAttribute("data-url"))}`;
+            
+            const downloadResponse = await fetch(downloadUrl);
+
+            if (downloadResponse.headers.get("content-type") === "audio/mpeg") {
+                const audioBlob = await downloadResponse.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Buat elemen unduhan
+                const downloadLink = document.createElement("a");
+                downloadLink.href = audioUrl;
+                downloadLink.download = `${data.title}.mp3`;
+                downloadLink.click();
+            } else {
+                alert("❌ Gagal mengunduh file audio.");
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        songDetails.innerHTML = "❌ Terjadi kesalahan saat memproses permintaan.";
+    }
+});</script></body></html>
